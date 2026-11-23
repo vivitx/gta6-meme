@@ -10,11 +10,28 @@
 // Outside the grader's container, MAKEFUN_BOT_DIR and MAKEFUN_OUTPUT_DIR stand in for /bot and /output:
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { copyFileSync, mkdirSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const BOT_DIR = process.env.MAKEFUN_BOT_DIR ?? '/bot';
 const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+// Validate that POST.json names a real X status URL before copying it: the
+// gate reads the post from X, so a placeholder or malformed address is a
+// wasted entry. A valid address looks like https://x.com/<handle>/status/<id>.
+const STATUS_URL = /^https:\/\/x\.com\/[^\/]+\/status\/\d+$/;
+let postUrl: string;
+try {
+  const post = JSON.parse(readFileSync(join(BOT_DIR, 'POST.json'), 'utf-8')) as { url?: unknown };
+  if (typeof post.url !== 'string' || !STATUS_URL.test(post.url)) {
+    throw new Error(`url is not a valid X status URL: ${JSON.stringify(post.url)}`);
+  }
+  postUrl = post.url;
+} catch (err) {
+  console.error(`POST.json in ${BOT_DIR} does not name a valid X post: ${(err as Error).message}`);
+  process.exit(1);
+}
+console.log(`POST.json names ${postUrl} — copying to /output`);
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
 try {

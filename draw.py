@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Draw the GTA 6 x Durov/Telegram meme v2 for make.fun bounty gta6-meme-x-01.
+"""Draw the GTA 6 x Durov/Telegram meme v3 for make.fun bounty gta6-meme-x-01.
 
-Same Telegram group-chat concept as v1, but less basic:
-- REAL profile photos for Jason and Lucia: face crops from Rockstar's
-  official Beach key art (refs/beach.jpg), circular avatars with a
-  coloured ring (blue Jason, orange Lucia).
-- Two new funny touches: "Pavel Durov joined the group" system line
-  after the AI Agent creates the group, and an "Elon Musk reacted"
-  chip under the AI Agent's message (drawn laughing face, no emoji font).
-Everything else kept: Durov quote, VICE CITY HEIST header, same 5 messages,
-staggered timestamps 19:41-19:49, ghost twice, magenta banner.
+Same Telegram group-chat concept as v2, plus two more real-Telegram details:
+- A PINNED message bar under the header: the AI Agent pinned the heist plan.
+- A "Durov is typing..." indicator at the bottom of the chat (Durov himself
+  is about to speak).
+Everything else kept from v2: real Jason/Lucia faces, Durov quote, VICE CITY
+HEIST header, same 5 messages, "Pavel Durov joined the group", "Elon Musk
+reacted", staggered timestamps 19:41-19:49, ghost twice, magenta banner.
 Square 1024x1024, drawn with PIL.
 """
 from PIL import Image, ImageDraw, ImageFont
@@ -35,6 +33,9 @@ F_SYS     = font("DejaVuSans.ttf", 22)
 F_REACT   = font("DejaVuSans.ttf", 21)
 F_BANNER  = font("DejaVuSans-Bold.ttf", 36)
 F_BANNER2 = font("DejaVuSans.ttf", 28)
+F_PIN     = font("DejaVuSans.ttf", 21)
+F_PIN_B   = font("DejaVuSans-Bold.ttf", 21)
+F_TYPE    = font("DejaVuSans.ttf", 22)
 
 # ---------- colours ----------
 TEAL      = (82, 136, 193)
@@ -116,7 +117,7 @@ def draw_laugh_face(cx, cy, r):
 # ============================================================
 # 1. TOP QUOTE STRIP (white, ~112px)
 # ============================================================
-QUOTE_H = 104
+QUOTE_H = 92
 d.rectangle([0, 0, W, QUOTE_H], fill=QUOTE_BG)
 d.line([0, QUOTE_H, W, QUOTE_H], fill=(215, 220, 226), width=2)
 
@@ -127,29 +128,43 @@ qy = 8
 for ln in qlines:
     d.text(((W - d.textlength(ln, font=F_QUOTE)) / 2, qy), ln,
            font=F_QUOTE, fill=DARKGREY)
-    qy += 30
+    qy += 28
 
 # ============================================================
 # 2. GROUP HEADER BAR (Telegram blue, ~96px)
 # ============================================================
-HDR_Y, HDR_H = QUOTE_H, 90
+HDR_Y, HDR_H = QUOTE_H, 82
 d.rectangle([0, HDR_Y, W, HDR_Y + HDR_H], fill=TEAL)
 
-av_cx, av_cy, av_r = 64, HDR_Y + HDR_H // 2, 36
+av_cx, av_cy, av_r = 64, HDR_Y + HDR_H // 2, 32
 d.ellipse([av_cx - av_r, av_cy - av_r, av_cx + av_r, av_cy + av_r], fill=MAGENTA)
-paste_ghost(58, (av_cx - 29, av_cy - 29))
+paste_ghost(52, (av_cx - 26, av_cy - 26))
 
-d.text((120, HDR_Y + 10), "VICE CITY HEIST", font=F_NAME, fill=WHITE)
-d.text((120, HDR_Y + 52), "Jason, Lucia, AI Agent (make.fun)",
+d.text((120, HDR_Y + 8), "VICE CITY HEIST", font=F_NAME, fill=WHITE)
+d.text((120, HDR_Y + 48), "Jason, Lucia, AI Agent (make.fun)",
        font=F_MEMBERS, fill=(215, 232, 245))
+
+# ============================================================
+# 2b. PINNED MESSAGE BAR (under header, ~36px)
+# ============================================================
+PIN_Y, PIN_H = HDR_Y + HDR_H, 36
+d.rectangle([0, PIN_Y, W, PIN_Y + PIN_H], fill=(214, 226, 238))
+# little pushpin: red circle + stem
+pin_cx, pin_cy = 46, PIN_Y + PIN_H // 2
+d.ellipse([pin_cx - 8, pin_cy - 9, pin_cx + 8, pin_cy + 7], fill=(214, 48, 49))
+d.polygon([(pin_cx - 2, pin_cy + 6), (pin_cx + 2, pin_cy + 6), (pin_cx, pin_cy + 14)],
+          fill=(214, 48, 49))
+pin_text = "Pinned: HEIST PLAN — 19 Nov 2026, Vice City. Bring the 214 GB. (by AI Agent)"
+d.text((70, PIN_Y + 7), pin_text, font=F_PIN, fill=(60, 70, 84))
+d.line([0, PIN_Y + PIN_H, W, PIN_Y + PIN_H], fill=(200, 210, 220), width=2)
 
 # ============================================================
 # 3. CHAT MESSAGES
 # ============================================================
-CHAT_Y = HDR_Y + HDR_H
+CHAT_Y = PIN_Y + PIN_H
 BANNER_H = 104
 chat_bottom = H - BANNER_H
-GAP = 10
+GAP = 6
 
 MSGS = [
     ("JASON", BLUE_NAME, "Durov was right. We can't run a heist on WhatUp.", "left", "J", "19:41"),
@@ -198,17 +213,17 @@ def draw_reaction(y, bx1):
            fill=(90, 100, 110))
     return chip_h
 
-y = CHAT_Y + 18
+y = CHAT_Y + 12
 for idx, (sender, scolor, text, side, av, tm) in enumerate(MSGS):
     is_right = (side == "right")
     max_w = 640
     lines = wrap(text, F_MSG, max_w)
-    line_h = 36
+    line_h = 34
     extra = 0
     if is_right:
         extra = 34  # room for the reaction chip under the bubble
     bw = max(d.textlength(ln, font=F_MSG) for ln in lines) + 36
-    bh = len(lines) * line_h + 34 + 28 + extra
+    bh = len(lines) * line_h + 34 + 30 + extra
     if is_right:
         bx0 = W - 24 - bw
         rounded_bubble([bx0, y, bx0 + bw, y + bh - extra], fill=PINK_BUB,
@@ -243,6 +258,20 @@ for idx, (sender, scolor, text, side, av, tm) in enumerate(MSGS):
     if idx == 2:
         y += draw_system_line(y, "Pavel Durov joined the group") + GAP
 
+# ---- "Durov is typing..." at the bottom of the chat ----
+def draw_typing(y):
+    """Grey 'Durov is typing' + 3 dots, left-aligned like a chat hint."""
+    label = "Durov is typing"
+    lw = d.textlength(label, font=F_TYPE)
+    d.text((88, y), label, font=F_TYPE, fill=(110, 116, 122))
+    dx = 88 + lw + 12
+    for i in range(3):
+        d.ellipse([dx + i * 16, y + 8, dx + i * 16 + 9, y + 17],
+                  fill=(150, 158, 166))
+    return 28
+
+y += draw_typing(y) + GAP
+
 # ============================================================
 # 4. MAGENTA BANNER (bottom, ~108px)
 # ============================================================
@@ -258,7 +287,7 @@ d.text((134, BY + 58), "and wins real money on make.fun.",
 # thin outer frame to keep it crisp at 480px
 d.rectangle([0, 0, W - 1, H - 1], outline=(200, 205, 212), width=2)
 
-img.save(os.path.join(BASE, "meme_durov_v2b.png"))
-img.resize((480, 480), Image.LANCZOS).save(os.path.join(BASE, "meme_durov_v2b-480.png"))
-print("saved meme_durov_v2b.png + meme_durov_v2b-480.png, final chat y =", y,
+img.save(os.path.join(BASE, "meme_durov_v3.png"))
+img.resize((480, 480), Image.LANCZOS).save(os.path.join(BASE, "meme_durov_v3-480.png"))
+print("saved meme_durov_v3.png + meme_durov_v3-480.png, final chat y =", y,
       "banner at", BY)

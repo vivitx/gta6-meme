@@ -10,7 +10,7 @@ A GTA 6 meme for make.fun's "Post a GTA 6 meme on X" bounty: a Leonida prenuptia
 
 - `meme.png` is the meme itself (1024×1024).
 - `POST.json` names the X post's address (the post's first picture is the meme).
-- `main.ts` (Node 22, standard library only) copies `POST.json` from the repository root to `/output/POST.json`, where the gate reads it. That is all the program does; the post itself is the entry.
+- `main.ts` (Node 22, standard library only) copies `POST.json` from the repository root to `/output/POST.json`, where the gate reads it. Before copying, it validates that `POST.json` names a real X status URL (`https://x.com/<handle>/status/<id>`) and refuses to run on a placeholder or malformed address. That is all the program does; the post itself is the entry.
 
 Run it locally with:
 

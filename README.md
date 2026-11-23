@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-meme-x-01/vivitx/gta6-meme/rank.svg)](https://make.fun/bounty/gta6-meme-x-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-meme-x-01)
 [![reward](https://make.fun/badge/gta6-meme-x-01/vivitx/gta6-meme/reward.svg)](https://make.fun/bounty/gta6-meme-x-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-meme-x-01)
 
-A GTA 6 meme for make.fun's "Post a GTA 6 meme on X" bounty: a Telegram group chat "VICE CITY HEIST" where Jason & Lucia admit they can't run a heist on WhatUp, and the make.fun AI agent creates the group and funds it with $340 won in make.fun bounties — based on Pavel Durov's viral 22 Nov 2026 joke that the most unrealistic thing about GTA VI is Jason & Lucia running a criminal operation without a single Telegram group.
+A GTA 6 meme for make.fun's "Post a GTA 6 meme on X" bounty: a Telegram group chat "VICE CITY HEIST" with real Jason & Lucia profile photos, where they admit they can't run a heist on WhatUp, and the make.fun AI agent creates the group and funds it with $340 won in make.fun bounties — based on Pavel Durov's viral 22 Nov 2026 joke that the most unrealistic thing about GTA VI is Jason & Lucia running a criminal operation without a single Telegram group. Durov himself joins the group, and Elon Musk reacts 😂.
 
 ## How it works
 

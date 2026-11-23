@@ -1,206 +1,202 @@
 #!/usr/bin/env python3
-"""GTA 6 meme v3b — Leonida prenuptial agreement, visually enhanced.
+"""Draw the GTA 6 x Durov/Telegram meme for make.fun bounty gta6-meme-x-01.
 
-Same text as v3 (prenup, 0 entries in the bounty), with visual punch added:
-- bold red diagonal "JUST MARRIED" stamp (lower right, clear of all text)
-- "IN THE EVENT OF DIVORCE:" in dark red; the $340 money line larger/bolder
-- small interlinked gold wedding rings flanking the "Between" line
-- ghost notary seal slightly larger with a stronger gold ring
-PIL only — pixel-perfect text. Output: meme_v3b.png (+480px downscale).
+A Telegram group-chat screenshot: Durov's viral quote on top, the VICE CITY
+HEIST group header with the make.fun ghost as group avatar, chat bubbles
+from Jason / Lucia / AI Agent (make.fun), magenta banner at the bottom.
+Square 1024x1024, drawn with PIL (pixel-perfect text, real ghost logo).
 """
 from PIL import Image, ImageDraw, ImageFont
+import textwrap, os
 
 W = H = 1024
-CREAM = (247, 241, 222)      # paper
-INK = (31, 27, 22)           # near-black ink
-FAINT = (110, 100, 85)       # secondary text
-MAGENTA = (230, 0, 126)      # make.fun magenta
-DARKRED = (170, 30, 30)      # divorce header
-STAMP_RED = (198, 24, 28)    # stamp red
-GOLD = (176, 134, 11)
-WHITE = (255, 255, 255)
+BASE = os.path.expanduser("~/workspace/makefun/gta6-meme")
+GHOST = os.path.join(BASE, "press/mark-1024.png")
 
-SERIF = "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"
-SERIF_B = "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"
-SERIF_I = "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf"
-SANS_B = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
-SANS = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+# ---------- fonts ----------
+def font(name, size):
+    return ImageFont.truetype(f"/usr/share/fonts/truetype/dejavu/{name}", size)
 
-GHOST = "/home/hatch/workspace/makefun/gta6-meme/press/mark-1024.png"
+F_QUOTE   = font("DejaVuSans.ttf", 30)
+F_QUOTE_B = font("DejaVuSans-Bold.ttf", 26)
+F_NAME    = font("DejaVuSans-Bold.ttf", 40)
+F_MEMBERS = font("DejaVuSans.ttf", 27)
+F_SENDER  = font("DejaVuSans-Bold.ttf", 25)
+F_MSG     = font("DejaVuSans.ttf", 31)
+F_MSG_B   = font("DejaVuSans-Bold.ttf", 31)
+F_TIME    = font("DejaVuSans.ttf", 20)
+F_BANNER  = font("DejaVuSans-Bold.ttf", 36)
+F_BANNER2 = font("DejaVuSans.ttf", 28)
 
+# ---------- colours ----------
+TEAL      = (82, 136, 193)     # Telegram header blue
+CHAT_BG   = (237, 241, 245)    # light chat background
+WHITE     = (255, 255, 255)
+INK       = (20, 20, 20)
+GREY      = (110, 116, 122)
+DARKGREY  = (90, 90, 90)
+MAGENTA   = (230, 0, 126)      # make.fun magenta
+MAGENTA_D = (196, 0, 107)
+PINK_BUB  = (253, 232, 243)    # magenta-tinted bubble
+PINK_EDGE = (230, 0, 126)
+BLUE_NAME = (43, 130, 196)
+ORANGE    = (224, 122, 26)
+QUOTE_BG  = (255, 255, 255)
 
-def font(path, size):
-    return ImageFont.truetype(path, size)
+img = Image.new("RGB", (W, H), CHAT_BG)
+d = ImageDraw.Draw(img)
+ghost = Image.open(GHOST).convert("RGBA")
 
-
-def text_w(draw, s, f):
-    return draw.textbbox((0, 0), s, font=f)[2]
-
-
-def draw_centered(draw, cx, y, s, f, fill=INK):
-    w = text_w(draw, s, f)
-    draw.text((cx - w / 2, y), s, font=f, fill=fill)
-    return y + f.size
-
-
-def draw_mixed_left(draw, x, y, segments):
-    """segments: list of (text, font, fill). Draws them left-aligned from x."""
-    for s, f, fill in segments:
-        draw.text((x, y), s, font=f, fill=fill)
-        x += text_w(draw, s, f)
-
-
-def fit_font(draw, s, path, start_size, max_w):
-    size = start_size
-    while size > 12:
-        f = font(path, size)
-        if text_w(draw, s, f) <= max_w:
-            return f
-        size -= 2
-    return font(path, 12)
-
-
-def main():
-    img = Image.new("RGB", (W, H), CREAM)
-    d = ImageDraw.Draw(img)
-    cx = W // 2
-
-    # --- borders ---
-    d.rectangle([22, 22, 1002, 1002], outline=INK, width=5)
-    d.rectangle([34, 34, 990, 990], outline=INK, width=2)
-
-    # --- header ---
-    f_state = fit_font(d, "STATE OF LEONIDA", SERIF_B, 36, 900)
-    draw_centered(d, cx, 52, "STATE OF LEONIDA", f_state)
-
-    f_sub = font(SERIF, 20)
-    draw_centered(d, cx, 96, "COUNTY OF VICE CITY  ·  FAMILY LAW DIVISION", f_sub, fill=FAINT)
-
-    f_title = fit_font(d, "PRENUPTIAL AGREEMENT", SERIF_B, 56, 920)
-    draw_centered(d, cx, 126, "PRENUPTIAL AGREEMENT", f_title)
-
-    # double rule under header
-    d.line([(90, 200), (934, 200)], fill=INK, width=2)
-    d.line([(90, 206), (934, 206)], fill=INK, width=1)
-
-    # --- parties ---
-    f_between = font(SERIF_I, 24)
-    draw_centered(d, cx, 224, "Between", f_between)
-
-    # wedding-rings motif: two interlinked gold circles flanking "Between"
-    # (headline spans the full width, so the rings sit on the "Between" line)
-    for rcx in (150, 874):
-        for off in (-6, 6):
-            d.ellipse([rcx + off - 13, 236 - 13, rcx + off + 13, 236 + 13],
-                      outline=GOLD, width=3)
-
-    f_names = fit_font(d, "THE PLAYER  &  GRAND THEFT AUTO VI", SERIF_B, 38, 920)
-    draw_centered(d, cx, 254, "THE PLAYER  &  GRAND THEFT AUTO VI", f_names)
-
-    f_eff = font(SERIF, 24)
-    draw_centered(d, cx, 306, "Effective: 19 NOVEMBER 2026, Vice City, Leonida", f_eff)
-
-    f_eng = fit_font(d, "After a 13-year engagement (4,811 days, 17 Sep 2013 – 19 Nov 2026)",
-                     SERIF, 24, 920)
-    draw_centered(d, cx, 336, "After a 13-year engagement (4,811 days, 17 Sep 2013 – 19 Nov 2026)", f_eng)
-
-    f_del = font(SERIF, 24)
-    draw_centered(d, cx, 366, "Delays survived: 2 — Fall 2025, May 2026", f_del)
-
-    # --- ASSETS section (left-aligned) ---
-    lx = 96
-    f_sec = font(SERIF_B, 27)
-    d.text((lx, 408), "ASSETS:", font=f_sec, fill=INK)
-    f_item = font(SERIF, 24)
-    f_money = font(SERIF_B, 27)
-    assets = [
-        "1 console (purchased 2013, still works)",
-        "4,811 days of patience",
-        None,  # $340 money line, drawn separately (larger/bolder, make.fun in magenta)
-        "214 GB of storage (reserved for GTA VI)",
-    ]
-    y = 442
-    for a in assets:
-        if a is None:
-            d.text((lx + 22, y), "—", font=f_money, fill=INK)
-            draw_mixed_left(d, lx + 52, y, [
-                ("$340 in ", f_money, INK),
-                ("make.fun", f_money, MAGENTA),
-                (" bounties (won by my AI agent)", f_money, INK),
-            ])
+def wrap(text, fnt, max_w):
+    """Greedy word wrap to max pixel width."""
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        trial = (cur + " " + w).strip()
+        if d.textlength(trial, font=fnt) <= max_w:
+            cur = trial
         else:
-            d.text((lx + 22, y), "—", font=f_item, fill=INK)
-            d.text((lx + 52, y), a, font=f_item, fill=INK)
-        y += 30
-    # extra gap after the taller money line
-    y += 4
+            if cur:
+                lines.append(cur)
+            cur = w
+    if cur:
+        lines.append(cur)
+    return lines
 
-    # --- DIVORCE section (header in dark red) ---
-    d.text((lx, 568), "IN THE EVENT OF DIVORCE:", font=f_sec, fill=DARKRED)
-    divorce = [
-        "GTA V gets the console.",
-        "GTA VI gets the 214 GB.",
-        "My AI agent keeps the make.fun winnings.",
-    ]
-    y = 602
-    for dv in divorce:
-        d.text((lx + 22, y), "—", font=f_item, fill=INK)
-        d.text((lx + 52, y), dv, font=f_item, fill=INK)
-        y += 30
+def rounded_bubble(box, fill, outline=None, radius=26):
+    d.rounded_rectangle(box, radius=radius, fill=fill,
+                        outline=outline, width=2 if outline else 1)
 
-    # --- witnesses + binding line ---
-    f_wit = font(SERIF, 24)
-    draw_centered(d, cx, 694, "Witnesses: JASON & LUCIA", f_wit)
-    f_bind = font(SERIF_I, 23)
-    draw_centered(d, cx, 722, "This agreement is binding until the next delay.", f_bind)
+def paste_ghost(size, xy):
+    g = ghost.resize((size, size), Image.LANCZOS)
+    img.paste(g, xy, g)
 
-    # --- notary seal: the real make.fun ghost, slightly larger, stronger ring ---
-    ghost = Image.open(GHOST).convert("RGBA")
-    seal_size = 136
-    seal = ghost.resize((seal_size, seal_size), Image.LANCZOS)
-    seal_x = cx - seal_size // 2
-    seal_y = 750
-    d.ellipse([seal_x - 6, seal_y - 6, seal_x + seal_size + 6, seal_y + seal_size + 6],
-              outline=GOLD, width=5)
-    img.paste(seal, (seal_x, seal_y), seal)
-    d = ImageDraw.Draw(img)
+# ============================================================
+# 1. TOP QUOTE STRIP (white, ~128px)
+# ============================================================
+QUOTE_H = 128
+d.rectangle([0, 0, W, QUOTE_H], fill=QUOTE_BG)
+d.line([0, QUOTE_H, W, QUOTE_H], fill=(215, 220, 226), width=2)
 
-    f_notary = font(SERIF_B, 19)
-    draw_centered(d, cx, 898, "NOTARY: AN AI AGENT ON MAKE.FUN  ·  No. VI-4811", f_notary)
+quote = ('"The most unrealistic thing about GTA VI is Jason & Lucia running '
+         'a criminal operation without a single Telegram group." — Durov')
+qlines = wrap(quote, F_QUOTE, 920)
+qy = 12
+for ln in qlines:
+    d.text(((W - d.textlength(ln, font=F_QUOTE)) / 2, qy), ln,
+           font=F_QUOTE, fill=DARKGREY)
+    qy += 34
 
-    # --- magenta banner at the bottom ---
-    banner_y0, banner_y1 = 922, 988
-    d.rectangle([38, banner_y0, 986, banner_y1], fill=MAGENTA)
-    banner_ghost = ghost.resize((58, 58), Image.LANCZOS)
-    img.paste(banner_ghost, (58, banner_y0 + 4), banner_ghost)
-    d = ImageDraw.Draw(img)
-    f_b1 = font(SANS_B, 26)
-    f_b2 = font(SANS, 21)
-    d.text((134, banner_y0 + 6), "SIGNED BY MY AI AGENT", font=f_b1, fill=WHITE)
-    d.text((134, banner_y0 + 36), "with real money it won in make.fun bounties.", font=f_b2, fill=WHITE)
+# ============================================================
+# 2. GROUP HEADER BAR (Telegram blue, ~100px)
+# ============================================================
+HDR_Y, HDR_H = QUOTE_H, 100
+d.rectangle([0, HDR_Y, W, HDR_Y + HDR_H], fill=TEAL)
 
-    # --- bold red diagonal "JUST MARRIED" stamp (lower right) ---
-    # drawn on its own layer, rotated, then pasted; placed clear of all text:
-    # spans roughly x 720-980, y 713-887 — right of the seal, below the divorce
-    # lines, above the notary line.
-    sw, sh = 240, 105
-    stamp = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
-    sd = ImageDraw.Draw(stamp)
-    red = STAMP_RED + (240,)
-    sd.rectangle([4, 4, sw - 5, sh - 5], outline=red, width=4)
-    sd.rectangle([12, 12, sw - 13, sh - 13], outline=red, width=2)
-    f_s = font(SANS_B, 32)
-    for line, ly in (("JUST", 18), ("MARRIED", 54)):
-        w = text_w(sd, line, f_s)
-        sd.text(((sw - w) / 2, ly), line, font=f_s, fill=red)
-    stamp = stamp.rotate(18, expand=True, resample=Image.BICUBIC)
-    img.paste(stamp, (850 - stamp.width // 2, 800 - stamp.height // 2), stamp)
+# group avatar: magenta disc + ghost
+av_cx, av_cy, av_r = 66, HDR_Y + HDR_H // 2, 40
+d.ellipse([av_cx - av_r, av_cy - av_r, av_cx + av_r, av_cy + av_r], fill=MAGENTA)
+paste_ghost(66, (av_cx - 33, av_cy - 33))
 
-    img.save("/home/hatch/workspace/makefun/gta6-meme/meme_v3b.png")
-    img.resize((480, 480), Image.LANCZOS).save(
-        "/home/hatch/workspace/makefun/gta6-meme/meme_v3b-480.png")
-    print("saved meme_v3b.png + meme_v3b-480.png")
+d.text((124, HDR_Y + 14), "VICE CITY HEIST", font=F_NAME, fill=WHITE)
+d.text((124, HDR_Y + 58), "Jason, Lucia, AI Agent (make.fun)",
+       font=F_MEMBERS, fill=(215, 232, 245))
 
+# ============================================================
+# 3. CHAT MESSAGES
+# ============================================================
+CHAT_Y = HDR_Y + HDR_H
+BANNER_H = 112
+chat_bottom = H - BANNER_H
 
-if __name__ == "__main__":
-    main()
+# (sender, colour, text, side, avatar_kind, time)
+# avatar_kind: 'J' blue circle, 'L' orange circle, 'ghost' magenta disc
+MSGS = [
+    ("JASON", BLUE_NAME, "Durov was right. We can't run a heist on WhatUp.", "left", "J", "19:41"),
+    ("LUCIA", ORANGE, "No group. No plan. Just chaos.", "left", "L", "19:43"),
+    ("AI AGENT · make.fun", MAGENTA_D,
+     "Group created. Plan pinned. I funded it with $340 I won in make.fun bounties.",
+     "right", "ghost", "19:45"),
+    ("JASON", BLUE_NAME, "Finally. A real group chat.", "left", "J", "19:47"),
+    ("LUCIA", ORANGE, "Heist is on. 19 Nov 2026.", "left", "L", "19:49"),
+]
+
+def draw_avatar(cx, cy, kind):
+    r = 24
+    if kind == "ghost":
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=MAGENTA)
+        paste_ghost(40, (cx - 20, cy - 20))
+    elif kind == "J":
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=BLUE_NAME)
+        t = "J"
+        d.text((cx - d.textlength(t, font=F_MSG_B) / 2, cy - 21), t,
+               font=F_MSG_B, fill=WHITE)
+    else:
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=ORANGE)
+        t = "L"
+        d.text((cx - d.textlength(t, font=F_MSG_B) / 2, cy - 21), t,
+               font=F_MSG_B, fill=WHITE)
+
+y = CHAT_Y + 22
+for sender, scolor, text, side, av, tm in MSGS:
+    is_right = (side == "right")
+    if is_right:
+        max_w = 640
+        lines = wrap(text, F_MSG, max_w)
+        line_h = 40
+        bw = max(d.textlength(ln, font=F_MSG) for ln in lines) + 36
+        bh = len(lines) * line_h + 34 + 30   # sender + lines + own time row
+        bx1 = W - 24 - bw
+        bx0 = bx1
+        # sender name inside bubble top
+        rounded_bubble([bx0, y, bx0 + bw, y + bh], fill=PINK_BUB,
+                       outline=PINK_EDGE, radius=24)
+        tx = bx0 + 18
+        ty = y + 10
+        d.text((tx, ty), sender, font=F_SENDER, fill=scolor)
+        ty += 32
+        for ln in lines:
+            d.text((tx, ty), ln, font=F_MSG, fill=INK)
+            ty += line_h
+        # time, bottom right inside bubble
+        d.text((bx0 + bw - 18 - d.textlength(tm, font=F_TIME), y + bh - 26),
+               tm, font=F_TIME, fill=GREY)
+        y += bh + 16
+    else:
+        max_w = 640
+        lines = wrap(text, F_MSG, max_w)
+        line_h = 40
+        bw = max(d.textlength(ln, font=F_MSG) for ln in lines) + 36
+        bh = len(lines) * line_h + 34 + 30
+        bx0 = 88
+        rounded_bubble([bx0, y, bx0 + bw, y + bh], fill=WHITE, radius=24)
+        draw_avatar(52, y + 30, av)
+        tx = bx0 + 18
+        ty = y + 10
+        d.text((tx, ty), sender, font=F_SENDER, fill=scolor)
+        ty += 32
+        for ln in lines:
+            d.text((tx, ty), ln, font=F_MSG, fill=INK)
+            ty += line_h
+        d.text((bx0 + bw - 18 - d.textlength(tm, font=F_TIME), y + bh - 26),
+               tm, font=F_TIME, fill=GREY)
+        y += bh + 16
+
+# ============================================================
+# 4. MAGENTA BANNER (bottom, ~112px)
+# ============================================================
+BY = H - BANNER_H
+d.rectangle([0, BY, W, H], fill=MAGENTA)
+# white disc + ghost on the left
+bcx, bcy, br = 74, BY + BANNER_H // 2, 44
+d.ellipse([bcx - br, bcy - br, bcx + br, bcy + br], fill=WHITE)
+paste_ghost(72, (bcx - 36, bcy - 36))
+d.text((138, BY + 16), "MY AI AGENT RUNS THE GROUP", font=F_BANNER, fill=WHITE)
+d.text((138, BY + 62), "and wins real money on make.fun.",
+       font=F_BANNER2, fill=(255, 235, 245))
+
+# thin outer frame to keep it crisp at 480px
+d.rectangle([0, 0, W - 1, H - 1], outline=(200, 205, 212), width=2)
+
+img.save(os.path.join(BASE, "meme_durov.png"))
+img.resize((480, 480), Image.LANCZOS).save(os.path.join(BASE, "meme_durov-480.png"))
+print("saved meme_durov.png + meme_durov-480.png")
